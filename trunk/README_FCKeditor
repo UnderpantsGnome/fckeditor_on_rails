@@ -1,0 +1,42 @@
+README for FCKeditor on Rails
+
+To install:
+	install FCKeditor into your app under public/fckeditor
+
+	extract fckeditor_on_rails into your app
+
+	add the environment settings found in
+		config/environment.rb.fck_settings
+		to config/environment.rb
+
+		if you want to use a different base dir than /fckeditor/
+		you will need to use the included patched fckeditor.js
+
+	copy the fckeditor() helper into app/helpers/application_helper.rb
+		or add helper :fckeditor into the controller(s) you want access from
+
+	startup the server and go to /fckeditor where you will find a test page
+		this page has been configured to display nothing if in any
+		environment other than development
+
+Useage:
+	In the simplest case useage would be
+	<%= fckeditor(:object, :param, {:width => '600px', :height => '500px'}) -%>
+
+	See index.rhtml for other options
+
+TODO:
+	- Learn Ruby and fix the code up
+	- Add command support for the mcpuk file browser
+		(http://mcpuk.net/)
+	- Figure out how to make this a gem
+	- Fix bugs as reported
+	- Better docs
+
+Contact:
+	Michael Moen
+	mi-rails@underpantsgnome.com
+
+History:
+	2005-09-11 (0.01) - Initial
+

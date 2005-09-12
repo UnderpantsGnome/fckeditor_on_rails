@@ -1,0 +1,18 @@
+xml.instruct!
+
+xml.Connector( "command" => params[:Command], "resourceType" => params[:Type] ) do
+	xml.CurrentFolder( "path" => params[:CurrentFolder], "url" => params[:url] )
+
+	xml.Folders do
+		@dirs.each do |dir|
+			xml.Folder("name" => dir)
+		end
+	end
+
+	xml.Files do
+		@files.each do |file|
+			xml.File("name" => file[:name], "size" => file[:size] )
+		end
+	end
+end
+
