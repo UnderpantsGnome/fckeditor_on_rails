@@ -5,32 +5,19 @@
 <body>
 
 <%=
-	fckeditor( :object, :value, {
-			:width			=> '600px',
-			:height			=> '500px',
-
-			# only need this if it's different than the global
-			# or the default file browser, currently only default is supported
-			#:browser		=> 'mcpuk',
-
-			# don't need to pass this, it should be set in environment.rb
-			# in fact passing this in is currenty ignored
-			#:base_path		=> "#{FCKEDITOR_BASE}",
-
-			# don't need to pass this, it should be set in environment.rb
-			# in fact passing this in is currenty ignored
-			#:user_files_dir	=> "#{FCKEDITOR_UPLOADS}",
-
-			:custom_config	=> '/javascripts/fckconfig_custom.js'
-		}
-	)
+  fckeditor( :object, :value, {
+      :width      => '600px',
+      :height     => '500px',
+      :custom_config  => '/javascripts/fckconfig_custom.js'
+    }
+  )
 -%>
 
 <p>
 Use these to debug
 <form target=_blank" action="/fckeditor/connector?Command=FileUpload&Type=Image&CurrentFolder=/" method="post" enctype="multipart/form-data">
-	<input type="file" name="NewFile">
-	<input type="submit">
+  <input type="file" name="NewFile">
+  <input type="submit">
 </form>
 </p>
 
