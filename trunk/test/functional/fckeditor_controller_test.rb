@@ -18,7 +18,7 @@ class FckeditorControllerTest < Test::Unit::TestCase
     @request    = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
     
-    @test_dir = File.dirname($PROGRAM_NAME)
+    @test_dir = @@fixture_path
     @tmp_dir = "#{@test_dir}/#{TMP_DIR}"
     @img_dir = "#{@tmp_dir}/#{IMG_DIR}"
     
