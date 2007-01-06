@@ -1,108 +1,65 @@
 class FckeditorController < ApplicationController
-  # this may not be very Rubyesque, it's my first run at Ruby code
-  # I'm sure it will get better over time
-  # feel free to point out better ways to do thigs in Ruby
-  # if you can do it without being abusive ;)
-  before_filter :setup, :except => 'index'
-  
+  before_filter :get_options, :sanitize_directory
+  layout false
+
   def index
-    if RAILS_ENV != 'development'
-      render(:nothing => true)
+    render(:nothing => true) unless RAILS_ENV == 'development'
+  end
+
+  def connector
+    case params[:Command]
+      when 'GetFoldersAndFiles', 'GetFolders'
+        get_folders_and_files
+      when 'CreateFolder'
+        create_folder
+      when 'FileUpload'
+        upload_file
     end
   end
 
-  # figure out who needs to handle this request
-  def connector    
-    if @params[:Command] == 'GetFoldersAndFiles' || @params[:Command] == 'GetFolders'
-      get_folders_and_files(@params)
-    elsif @params[:Command] == 'CreateFolder'
-      create_folder(params)
-    elsif @params[:Command] == 'FileUpload'
-      upload_file(@params)
-    end
-  end
+private
 
-  private
-  def setup
-    defaultParams
-    status = 200
-    
-    # Check parameters for correctness
-    if (@params[:Command] !~ /^(GetFolders|GetFoldersAndFiles|CreateFolder|FileUpload)$/)
-      render :text => "Command parameter malformed: \"#{@params[:Command]}\"", status => 405
-    elsif (@params[:Type] !~ /^(File|Image|Flash|Media)$/)
-      render :text => "Type parameter malformed: \"#{@params[:Type]}\"", status => 405
-    elsif (@params[:CurrentFolder] !~ /^\/(.+\/)*$/)
-      render :text => "CurrentFolder parameter malformed: \"#{@params[:CurrentFolder]}\"", status => 405
-    else
-      # Make sure necessary directories exist
-      unless File.directory?(@params[:ServerPath])
-        Dir.mkdir(@params[:ServerPath])
-      end   
-      @dir = "#{params[:ServerPath]}#{params[:Type]}#{params[:CurrentFolder]}"
-      @url = "/UserFiles/#{params[:Type]}#{params[:CurrentFolder]}"
-      @error = 0
-    end
-  end
+  def get_folders_and_files
+    @files = []
+    @dirs = []
+    dir = Dir.new(@options[:dir])
 
-  # generate a directory listing
-  def get_folders_and_files(params)
-    @files    = Array.new
-    @dirs     = Array.new
+    dir.each do |x|
+      next if x =~ /^\.\.?$/ # skip . and ..
+      
+      # actual file system path
+      full_path = File.join(@options[:dir], x)
 
-    d = Dir.new(@dir)
-
-    d.each  { |x|
-      # skip . and .. I'm sure there's a better way to handle this
-      if x != '.' && x != '..'
-        # actual file system path
-        full_path = "#{@dir}/#{x}";
-
-        # found a directory add it to the list
-        if File.directory?(full_path)
-          @dirs << x
-        #if we only want directories, skip the files
-        elsif params[:Command] == 'GetFoldersAndFiles' && File.file?(full_path)
-          size = File.size(full_path)
-
-          if size != 0 && size < 1024
-            size = 1
-          else
-            size = File.size(full_path) / 1024
-          end
-
-          @files << { :name => x, :size => size };
-        end
+      # found a directory add it to the list
+      if File.directory?(full_path)
+        @dirs << x
+      # if we only want directories, skip the files
+      elsif params[:Command] == 'GetFoldersAndFiles' && File.file?(full_path)
+        size = File.size(full_path)
+        size = size != 0 && size < 1024 ? 1 : size / 1024
+        @files << { :name => x, :size => size };
       end
-    }
+    end
 
-    render(:template => 'fckeditor/files_and_folders', :layout => false)
-
-  rescue
-    render(:template => 'fckeditor/files_and_folders', :layout => false)
-
+    render 'fckeditor/files_and_folders'
   end
 
   # create a new directory
-  def create_folder(params)
-    new_dir   = @dir + params[:NewFolderName]
-    d = Dir.mkdir(new_dir)
-
-    render(:template => 'fckeditor/create_folder', :layout => false)
-
-  rescue Errno::EEXIST
-    # directory already exists
-    @error    = 101
-    render(:template => 'fckeditor/create_folder', :layout => false)
-  rescue Errno::EACCES
-    # permission denied
-    @error    = 103
-    render(:template => 'fckeditor/create_folder', :layout => false)
-  rescue
-    # any other error
-    @error    = 110
-    render(:template => 'fckeditor/create_folder', :layout => false)
-
+  def create_folder
+    begin
+      new_dir = @options[:dir] + params[:NewFolderName]
+      Dir.mkdir(new_dir)
+    rescue Errno::EEXIST
+      # directory already exists
+      @error = 101
+    rescue Errno::EACCES
+      # permission denied
+      @error = 103
+    rescue
+      # any other error
+      @error = 110
+    end
+    render 'fckeditor/create_folder'
   end
 
   # upload a new file
@@ -110,9 +67,9 @@ class FckeditorController < ApplicationController
   # file renamed and invalid file name
   # not sure how to catch invalid file name yet
   # I'm thinking there should be a permission denied error as well
-  def upload_file(params)
-    counter   = 1
-    @file_name  = params[:NewFile].original_filename
+  def upload_file
+    counter    = 1
+    @file_name = params[:NewFile].original_filename
 
     # break it up into file and extension
     # we need this to check the types and to build new names if necessary
@@ -120,47 +77,50 @@ class FckeditorController < ApplicationController
     path = File.basename(@file_name, ext)
 
     # check to make sure this extension isn't in deny and is in allow
-    if ! in_array(FCKEDITOR_FILE_TYPES[params[:Type]]['deny'], ext)
-       in_array(FCKEDITOR_FILE_TYPES[params[:Type]]['allow'], ext)
-      while File.exist?("#{@dir}#{@file_name}")
-        @file_name    = "#{path}(#{counter})#{ext}"
-        @error  = 201
-        counter     = counter.next
+    filetype = params[:Type].downcase.to_sym
+    if type_allowed(filetype, ext)
+      while File.exist?(File.join(@options[:dir], @file_name))
+        @file_name = "#{path}(#{counter})#{ext}"
+        @error = 201
+        counter += 1
       end
 
-      n = File.open("#{@dir}#{@file_name}", 'wb') { |f| f.write(params[:NewFile].read) }
+      File.open("#{@options[:dir]}#{@file_name}", 'wb') do |f| 
+        f.write(params[:NewFile].read)
+      end
     else
       # invalid file type
-      @error  = 202
-   end
+      @error = 202
+    end
 
-    render(:template => 'fckeditor/upload_file', :layout => false)
+    render 'fckeditor/upload_file'
   end
 
-  # helper to setup pathing info that is common to all methods
-  def defaultParams
-    if RAILS_ENV == 'production' or !@params.has_key?(:ServerPath)
-      # Allow destination directory to be overridden, otherwise it must be that which is configured
-      @params[:ServerPath]  = "#{RAILS_ROOT}/public/UserFiles/"
-    end
+  def type_allowed(filetype, ext)
+    type = Fckeditor.config[:file_types][filetype]
     
-    # Set defaults
-    @params[:Type]            = "Image" unless @params.has_key?(:Type)
-    @params[:CurrentFolder]   = "/" unless @params.has_key?(:CurrentFolder)
+    (! type[:deny] || ! type[:deny].include?(ext)) &&
+      (! type[:allow] || type[:allow].include?(ext))
   end
 
-  # helper to see if a value exists in an array
-  # I'm sure there is a more Rubyesque way to do this
-  # somebody let me know
-  def in_array(haystack, needle)
-    if haystack != nil && needle != nil
-      haystack.each { |val|
-        if val == needle
-          return true
-        end
-      }
+  def get_options
+    @error = 0
+    @options = {
+      :base_dir => File.join('public', Fckeditor.config[:uploads] || 'UserFiles')
+    }
+    @options[:url] = "/#{@options[:base_dir]}/#{params[:Type]}/#{params[:CurrentFolder]}".gsub(/\/+/, '/')
+    @options[:dir] = File.join(RAILS_ROOT, @options[:url])
+  end
+  
+  def sanitize_directory
+    if params[:CurrentFolder]
+      clean = File.expand_path(@options[:base_dir])
+      dirty = File.expand_path(@options[:dir])
+      
+      unless dirty.starts_with?(clean)
+        render :nothing => true, :status => 403
+        false
+      end
     end
-
-    return false
   end
 end

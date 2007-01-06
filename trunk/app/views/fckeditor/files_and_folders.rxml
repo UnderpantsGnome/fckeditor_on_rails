@@ -1,7 +1,7 @@
 xml.instruct!
 
 xml.Connector( "command" => params[:Command], "resourceType" => params[:Type] ) do
-  xml.CurrentFolder( "path" => params[:CurrentFolder], "url" => @url )
+  xml.CurrentFolder( "path" => params[:CurrentFolder], "url" => @options[:url] )
 
   xml.Folders do
     @dirs.each do |dir|

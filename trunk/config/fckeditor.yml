@@ -1,0 +1,68 @@
+# you will probably want to copy this file into your config/ and customize it
+# this one will be loaded if there isn't one in your config/
+---
+  :defaults:
+    # base URI for your fckeditor install
+    :base: '/fckeditor/'
+
+    # which File Browser should we use
+    # if it's not set here or in the fckeditor() call
+    # it will defaul to the default file browser
+    # only default is supported currently, need to implemnt actions for mcpuk
+    :browser: 'default'
+
+    # where you want the file browser to look for files
+    # this path starts at public/ so your settings should account for that
+    :upload_dir: '/UserFiles/'
+    
+    # toolbar for fckeditor to use, can be overridden on the fly
+    :toolbar_set: 'Default'
+
+    # this controls what files are allowed to be uploaded for different Types
+    # if there is only a deny anything other than those listed will be allowed
+    # if there is only an allow only those listed would be allowed
+    # the settings here are just a starting point, pay special attention to
+    # file deny and add anything you don't want anybody to be able to upload
+    :file_types:
+      :file:
+        :deny:
+          - '.rb'
+          - '.php'
+          - '.asp'
+          - '.aspx'
+          - '.ascx'
+          - '.jsp'
+          - '.cfm'
+          - '.cfc'
+          - '.pl'
+          - '.bat'
+          - '.cmd'
+          - '.exe'
+          - '.dll'
+          - '.reg'
+      :image:
+        :allow:
+          - '.jpg'
+          - '.gif'
+          - '.jpeg'
+          - '.png'
+      :flash:
+        :allow:
+          - '.swf'
+          - '.fla'
+      :media:
+        :allow:
+          - '.swf'
+          - '.fla'
+          - '.jpg'
+          - '.gif'
+          - '.jpeg'
+          - '.png'
+          - '.avi'
+          - '.mpg'
+          - '.mpeg'
+          
+    :development:
+
+    :test:
+      :upload_dir: '../test/UserFiles'

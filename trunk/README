@@ -1,0 +1,52 @@
+README for FCKeditor on Rails
+
+This can now be used as a plugin with both Engines and appable_plugins.
+
+Q: What is it? 
+A: A Rails like way to use the FCKeditor in a Rails app, it basically works 
+	 just like the normal helpers.
+	
+It supports the "default" upload interface, I've though about mcpuk support
+but since I'm not even using this in any projects currently I don't have the
+need or the time to implement all that mcpuk does. Maybe one of these days.
+
+Sample usage:
+	fckeditor(:object, :param, 
+		{:width => '600px', :height => '500px'}, # fck options
+		{:class => 'fancy'} # html options
+	)
+
+Basic install:
+	./script/plugin install http://svn.underpantsgnome.com/fckeditor_on_rails
+
+	appable_plugins info: http://wiki.pluginaweek.org/Appable_plugins
+
+	Required plugins (in proper load order) for using the appable_plugins:
+		loaded_plugins 
+		plugin_dependencies 
+		plugin_routing 
+		appable_plugins 
+		fckeditor_on_rails
+
+
+	Rails Engines info: http://rails-engines.org/
+
+	Required plugins (in proper load order) for using Engines:
+		engines
+		fckeditor_on_rails
+
+
+Contact:
+	Michael Moen
+	mi-rails@underpantsgnome.com
+	http://underpantsgnome.com/
+	http://trac.underpantsgnome.com/fckeditor_on_rails
+
+History:
+	2007-01-05 (0.1.0)
+		Clean up that ugly code a bit
+		Make it plugin ready for Rails 1.2
+		Move the config to YAML
+
+	2005-09-11 (0.0.1) - Initial
+
