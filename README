@@ -18,6 +18,9 @@ Sample usage:
 
 Basic install:
 	./script/plugin install http://svn.underpantsgnome.com/fckeditor_on_rails
+	
+	Drop a current copy of FCKeditor into public/fckeditor and setup whichever
+	method below you are using
 
 	appable_plugins info: http://wiki.pluginaweek.org/Appable_plugins
 
