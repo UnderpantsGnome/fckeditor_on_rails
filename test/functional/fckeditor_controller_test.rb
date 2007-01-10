@@ -243,6 +243,30 @@ class FckeditorControllerTest < Test::Unit::TestCase
                :content => /UploadCompleted\(202, '#{EXECUTABLE}'/
   end
 
+  def test_upload_above_safe
+    heman = uploaded_file("#{FILE_DIR}/#{EXECUTABLE}")
+    post :connector, { 
+      :Command => 'FileUpload', 
+      :Type => 'Image', 
+      :CurrentFolder => '../../../',
+      :NewFile => heman
+    }
+    
+    # we flat out reject these attempts 
+    assert_response :forbidden
+  end
+
+  def test_list_above_safe
+    get :connector, { 
+      :Command => 'GetFoldersAndFiles', 
+      :CurrentFolder => '../../../',
+      :Type => 'Image' 
+    }
+    
+    # we flat out reject these attempts 
+    assert_response :forbidden
+  end
+
   # get us an object that represents an uploaded file
   def uploaded_file(path, content_type="application/octet-stream", filename=nil)
     filename ||= File.basename(path)
