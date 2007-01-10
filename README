@@ -6,7 +6,7 @@ Q: What is it?
 A: A Rails like way to use the FCKeditor in a Rails app, it basically works 
 	 just like the normal helpers.
 	
-It supports the "default" upload interface, I've though about mcpuk support
+It supports the "default" upload interface, I've thought about mcpuk support
 but since I'm not even using this in any projects currently I don't have the
 need or the time to implement all that mcpuk does. Maybe one of these days.
 
@@ -38,6 +38,13 @@ Basic install:
 		engines
 		fckeditor_on_rails
 
+	By default it attempts to copy a functional test into your project, if you
+	don't want it running the tests just remove 
+	test/functional/fckeditor_controller_test.rb
+
+Uninstall:
+	./script/plugin uninstall fckeditor_on_rails
+	This will also remove the installed functional test
 
 Contact:
 	Michael Moen
@@ -47,9 +54,15 @@ Contact:
 
 History:
 	2007-01-05 (0.1.0)
-		Clean up that ugly code a bit
+		Clean up that ugly code a bit, Ok it was almost a rewrite, it was ugly
 		Make it plugin ready for Rails 1.2
 		Move the config to YAML
+		Clean up and add some tests
 
 	2005-09-11 (0.0.1) - Initial
 
+Thanks goes out to the following for patches:
+	Gregg Kellogg
+	Markus Kristo
+	Scott Carson
+	Gabriel Birke

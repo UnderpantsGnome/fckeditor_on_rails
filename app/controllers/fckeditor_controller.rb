@@ -3,7 +3,7 @@ class FckeditorController < ApplicationController
   layout false
 
   def index
-    render(:nothing => true) unless RAILS_ENV == 'development'
+    render :nothing => true unless RAILS_ENV == 'development'
   end
 
   def connector
@@ -41,14 +41,13 @@ private
       end
     end
 
-    render 'fckeditor/files_and_folders'
+    render :template => 'fckeditor/files_and_folders'
   end
 
   # create a new directory
   def create_folder
     begin
-      new_dir = @options[:dir] + params[:NewFolderName]
-      Dir.mkdir(new_dir)
+      Dir.mkdir(File.join(@options[:dir], params[:NewFolderName]))
     rescue Errno::EEXIST
       # directory already exists
       @error = 101
@@ -59,7 +58,7 @@ private
       # any other error
       @error = 110
     end
-    render 'fckeditor/create_folder'
+    render :template => 'fckeditor/create_folder'
   end
 
   # upload a new file
@@ -68,9 +67,8 @@ private
   # not sure how to catch invalid file name yet
   # I'm thinking there should be a permission denied error as well
   def upload_file
-    counter    = 1
+    counter = 1
     @file_name = params[:NewFile].original_filename
-
     # break it up into file and extension
     # we need this to check the types and to build new names if necessary
     ext = File.extname(@file_name)
@@ -93,7 +91,7 @@ private
       @error = 202
     end
 
-    render 'fckeditor/upload_file'
+    render :template => 'fckeditor/upload_file'
   end
 
   def type_allowed(filetype, ext)
@@ -105,18 +103,15 @@ private
 
   def get_options
     @error = 0
-    @options = {
-      :base_dir => File.join('public', Fckeditor.config[:uploads] || 'UserFiles')
-    }
-    @options[:url] = "/#{@options[:base_dir]}/#{params[:Type]}/#{params[:CurrentFolder]}".gsub(/\/+/, '/')
-    @options[:dir] = File.join(RAILS_ROOT, @options[:url])
+    @options = {}
+    @options[:url] = "/#{Fckeditor.config[:upload_dir]}/#{params[:Type]}/#{params[:CurrentFolder]}".gsub(/\/+/, '/')
+    @options[:dir] = File.join('public', @options[:url])
   end
   
   def sanitize_directory
     if params[:CurrentFolder]
-      clean = File.expand_path(@options[:base_dir])
+      clean = File.expand_path(File.join(RAILS_ROOT, 'public', Fckeditor.config[:upload_dir]))
       dirty = File.expand_path(@options[:dir])
-      
       unless dirty.starts_with?(clean)
         render :nothing => true, :status => 403
         false

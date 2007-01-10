@@ -15,12 +15,16 @@
     # this path starts at public/ so your settings should account for that
     :upload_dir: '/UserFiles/'
     
+    # the starting point for uploaded files URLs
+    :url_base: '/'
+
     # toolbar for fckeditor to use, can be overridden on the fly
     :toolbar_set: 'Default'
 
     # this controls what files are allowed to be uploaded for different Types
     # if there is only a deny anything other than those listed will be allowed
     # if there is only an allow only those listed would be allowed
+    # if neither exist anything can be uploaded, not a good idea
     # the settings here are just a starting point, pay special attention to
     # file deny and add anything you don't want anybody to be able to upload
     :file_types:
@@ -62,7 +66,11 @@
           - '.mpg'
           - '.mpeg'
           
-    :development:
+  :development:
 
-    :test:
-      :upload_dir: '../test/UserFiles'
+  # just like the test DB, do not let this point to the same place as your
+  # default location, as the tests will rm_rf this dir, leaving this is fine
+  # if you don't want it running the tests you can remove 
+  # test/functional/fckeditor_controller_test.rb
+  :test:
+    :upload_dir: '../vendor/plugins/fckeditor_on_rails/test/UserFiles/'
