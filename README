@@ -43,7 +43,7 @@ Basic install:
 	test/functional/fckeditor_controller_test.rb
 
 Uninstall:
-	./script/plugin uninstall fckeditor_on_rails
+	./script/plugin remove fckeditor_on_rails
 	This will also remove the installed functional test
 
 Contact:
