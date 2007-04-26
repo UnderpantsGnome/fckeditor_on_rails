@@ -1,4 +1,4 @@
-module FckeditorHelper
+module ApplicationHelper
 	def fckeditor( object, method, fck_options = { }, options = { } )
 		# setup fck_options to be passed to js constructor
 		width = fck_options[:width] || 'null'
