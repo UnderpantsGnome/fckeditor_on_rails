@@ -32,4 +32,4 @@ class Fckeditor
   end
 end
 
-require File.join(__FILE__, '../app/helper/application_helper.rb')
+require File.join(File.dirname(__FILE__), '../app/helpers/application_helper.rb')
